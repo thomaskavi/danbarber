@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import com.thomaskavi.danbarber.dtos.CriarBarbeiroRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginResponseDTO;
-import com.thomaskavi.danbarber.entities.Role;
 import com.thomaskavi.danbarber.entities.Usuario;
+import com.thomaskavi.danbarber.enums.Role;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;
 import com.thomaskavi.danbarber.security.JwtService;
 

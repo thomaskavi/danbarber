@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.thomaskavi.danbarber.entities.Role;
 import com.thomaskavi.danbarber.entities.Usuario;
+import com.thomaskavi.danbarber.enums.Role;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 

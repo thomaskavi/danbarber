@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber.entities;
+package com.thomaskavi.danbarber.enums;
 
 public enum Role {
     DONO,

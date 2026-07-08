@@ -2,6 +2,8 @@ package com.thomaskavi.danbarber.entities;
 
 import java.math.BigDecimal;
 
+import com.thomaskavi.danbarber.enums.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

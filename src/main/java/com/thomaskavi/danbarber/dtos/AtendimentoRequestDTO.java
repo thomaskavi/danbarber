@@ -9,7 +9,9 @@ import jakarta.validation.constraints.NotNull;
 
 public record AtendimentoRequestDTO(
 
-        @NotNull(message = "O barbeiro é obrigatório")
+        // Opcional: só é usado quando o DONO está lançando em nome de um barbeiro.
+        // Quando um BARBEIRO faz a requisição, esse campo é ignorado —
+        // o barbeiro é sempre identificado pelo token de autenticação.
         Long barbeiroId,
 
         String nomeCliente,

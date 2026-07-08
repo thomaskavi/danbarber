@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.thomaskavi.danbarber.dtos.ComissaoBarbeiroDTO;
 import com.thomaskavi.danbarber.dtos.FechamentoMensalDTO;
-import com.thomaskavi.danbarber.entities.Role;
 import com.thomaskavi.danbarber.entities.Usuario;
+import com.thomaskavi.danbarber.enums.Role;
 import com.thomaskavi.danbarber.repositories.AtendimentoRepository;
 import com.thomaskavi.danbarber.repositories.DespesaRepository;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;

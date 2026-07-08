@@ -28,6 +28,7 @@ public class AtendimentoService {
     private final AtendimentoRepository atendimentoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ServicoRepository servicoRepository;
+    private final AutenticacaoService autenticacaoService;
 
     @SuppressWarnings("null")
 @Transactional
@@ -92,6 +93,12 @@ public class AtendimentoService {
         return atendimentoRepository.findByBarbeiroIdAndDataHoraBetween(barbeiroId, inicio, fim).stream()
                 .map(this::toResponseDTO)
                 .toList();
+    }
+
+      // Conveniência: o barbeiro logado consulta os próprios atendimentos, sem precisar saber o próprio ID
+    public List<AtendimentoResponseDTO> listarMeusAtendimentos(LocalDateTime inicio, LocalDateTime fim) {
+        Usuario usuarioLogado = autenticacaoService.obterUsuarioLogado();
+        return listarPorBarbeiroEPeriodo(usuarioLogado.getId(), inicio, fim);
     }
 
     private AtendimentoResponseDTO toResponseDTO(Atendimento a) {
