@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber.services;
+package com.thomaskavi.danbarber.dtos;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.thomaskavi.danbarber.dtos.ComissaoBarbeiroDTO;
+import com.thomaskavi.danbarber.dtos.FechamentoMensalDTO;
 import com.thomaskavi.danbarber.entities.Role;
 import com.thomaskavi.danbarber.entities.Usuario;
 import com.thomaskavi.danbarber.repositories.AtendimentoRepository;

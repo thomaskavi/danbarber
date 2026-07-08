@@ -1,8 +1,8 @@
-package com.thomaskavi.danbarber.services;
+package com.thomaskavi.danbarber.dtos;
 
 import java.util.List;
 
-import com.thomaskavi.danbarber.entities.FormaPagamento;
+import com.thomaskavi.danbarber.enums.FormaPagamento;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

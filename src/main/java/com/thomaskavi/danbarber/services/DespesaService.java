@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.thomaskavi.danbarber.dtos.DespesaRequestDTO;
+import com.thomaskavi.danbarber.dtos.DespesaResponseDTO;
 import com.thomaskavi.danbarber.entities.Despesa;
 import com.thomaskavi.danbarber.repositories.DespesaRepository;
 
@@ -16,7 +18,7 @@ public class DespesaService {
 
     private final DespesaRepository despesaRepository;
 
-    public Despesa registrar(DespesaRequestDTO dto) {
+    public DespesaResponseDTO registrar(DespesaRequestDTO dto) {
         Despesa despesa = Despesa.builder()
                 .descricao(dto.descricao())
                 .valor(dto.valor())
@@ -24,10 +26,16 @@ public class DespesaService {
                 .categoria(dto.categoria())
                 .build();
 
-        return despesaRepository.save(despesa);
+        return toResponseDTO(despesaRepository.save(despesa));
     }
 
-    public List<Despesa> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
-        return despesaRepository.findByDataBetween(inicio, fim);
+    public List<DespesaResponseDTO> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
+        return despesaRepository.findByDataBetween(inicio, fim).stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    private DespesaResponseDTO toResponseDTO(Despesa d) {
+        return new DespesaResponseDTO(d.getId(), d.getDescricao(), d.getValor(), d.getData(), d.getCategoria());
     }
 }

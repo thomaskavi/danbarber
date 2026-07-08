@@ -1,10 +1,10 @@
-package com.thomaskavi.danbarber.services;
+package com.thomaskavi.danbarber.dtos;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.thomaskavi.danbarber.entities.FormaPagamento;
+import com.thomaskavi.danbarber.enums.FormaPagamento;
 
 
 public record AtendimentoResponseDTO(

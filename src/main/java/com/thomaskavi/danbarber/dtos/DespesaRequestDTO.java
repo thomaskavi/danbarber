@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber.services;
+package com.thomaskavi.danbarber.dtos;
 
 import jakarta.validation.constraints.NotNull;
 

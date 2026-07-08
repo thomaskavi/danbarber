@@ -8,6 +8,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thomaskavi.danbarber.dtos.AtendimentoRequestDTO;
+import com.thomaskavi.danbarber.dtos.AtendimentoResponseDTO;
 import com.thomaskavi.danbarber.entities.Atendimento;
 import com.thomaskavi.danbarber.entities.AtendimentoServico;
 import com.thomaskavi.danbarber.entities.Servico;
