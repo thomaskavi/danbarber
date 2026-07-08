@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber;
+package com.thomaskavi.danbarber.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,29 +7,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
-@Table(name = "despesas")
+@Table(name = "servicos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Despesa {
+public class Servico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String descricao;
+    private String nome; // ex: "Corte", "Barba", "Corte + Barba"
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal valor;
+    private BigDecimal preco;
 
     @Column(nullable = false)
-    private LocalDate data;
-
-    // ex: "Aluguel", "Produtos", "Contas", "Manutenção"
-    private String categoria;
+    @Builder.Default
+    private boolean ativo = true;
 }

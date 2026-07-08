@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber;
+package com.thomaskavi.danbarber.entities;
 
 public enum FormaPagamento {
     PIX,

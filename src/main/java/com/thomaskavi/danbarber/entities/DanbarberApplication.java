@@ -1,4 +1,4 @@
-package com.thomaskavi.danbarber;
+package com.thomaskavi.danbarber.entities;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
