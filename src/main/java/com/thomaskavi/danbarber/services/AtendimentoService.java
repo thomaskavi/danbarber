@@ -17,6 +17,7 @@ import com.thomaskavi.danbarber.entities.Usuario;
 import com.thomaskavi.danbarber.repositories.AtendimentoRepository;
 import com.thomaskavi.danbarber.repositories.ServicoRepository;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;
+import com.thomaskavi.danbarber.enums.Role;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,8 @@ public class AtendimentoService {
 @Transactional
     public AtendimentoResponseDTO registrar(AtendimentoRequestDTO dto) {
 
-        Usuario barbeiro = usuarioRepository.findById(dto.barbeiroId())
-                .orElseThrow(() -> new EntityNotFoundException("Barbeiro não encontrado"));
+        Usuario usuarioLogado = autenticacaoService.obterUsuarioLogado();
+        Usuario barbeiro = definirBarbeiroDoAtendimento(usuarioLogado, dto.barbeiroId());
 
         List<Servico> servicos = servicoRepository.findAllById(dto.servicoIds());
 
@@ -118,4 +119,21 @@ public class AtendimentoService {
                 a.getObservacao()
         );
     }
+
+    // Regra de negócio central de "quem lança em nome de quem":
+// - BARBEIRO: sempre lança em nome de si mesmo, mesmo que envie outro barbeiroId no corpo
+// - DONO: precisa informar explicitamente o barbeiroId
+private Usuario definirBarbeiroDoAtendimento(Usuario usuarioLogado, Long barbeiroIdInformado) {
+    if (usuarioLogado.getRole() == Role.BARBEIRO) {
+        return usuarioLogado;
+    }
+
+    if (barbeiroIdInformado == null) {
+        throw new IllegalArgumentException(
+                "Como você está logado como dono, informe o barbeiroId do atendimento");
+    }
+
+    return usuarioRepository.findById(barbeiroIdInformado)
+            .orElseThrow(() -> new EntityNotFoundException("Barbeiro não encontrado"));
+}
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,6 +21,8 @@ import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Erros de validação (@Valid) — devolve campo + mensagem de cada erro
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -91,6 +95,8 @@ public class GlobalExceptionHandler {
     // Qualquer outro erro não previsto — esse continua sendo o "pega-tudo" de última instância
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenerico(Exception ex) {
+        // Essencial: sem isso, a exceção real nunca aparece no console
+        logger.error("Erro inesperado não tratado especificamente", ex);
         Map<String, Object> body = corpoBase(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno inesperado");
         return ResponseEntity.internalServerError().body(body);
     }
