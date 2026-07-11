@@ -1,16 +1,14 @@
 package com.thomaskavi.danbarber.services;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.thomaskavi.danbarber.dtos.ServicoRequestDTO;
 import com.thomaskavi.danbarber.dtos.ServicoResponseDTO;
 import com.thomaskavi.danbarber.entities.Servico;
 import com.thomaskavi.danbarber.repositories.ServicoRepository;
-
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +32,12 @@ public class ServicoService {
                 .toList();
     }
 
+    public List<ServicoResponseDTO> listarInativos() {
+        return servicoRepository.findByAtivoFalse().stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
     public ServicoResponseDTO atualizar(Long id, ServicoRequestDTO dto) {
         Servico servico = buscarOuFalhar(id);
         servico.setNome(dto.nome());
@@ -45,6 +49,12 @@ public class ServicoService {
         Servico servico = buscarOuFalhar(id);
         servico.setAtivo(false);
         servicoRepository.save(servico);
+    }
+
+    public ServicoResponseDTO reativar(Long id) {
+        Servico servico = buscarOuFalhar(id);
+        servico.setAtivo(true);
+        return toResponseDTO(servicoRepository.save(servico));
     }
 
     private Servico buscarOuFalhar(Long id) {
