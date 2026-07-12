@@ -1,6 +1,7 @@
 package com.thomaskavi.danbarber.controllers;
 
 import com.thomaskavi.danbarber.dtos.CriarBarbeiroRequestDTO;
+import com.thomaskavi.danbarber.dtos.CriarUsuarioRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginResponseDTO;
 import com.thomaskavi.danbarber.services.AuthService;
@@ -26,6 +27,14 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
+      // NOVO MÉTODO: Aberto ao público para registrar novos usuários/donos
+    @PostMapping("/register")
+    public ResponseEntity<Void> registrarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO dto) {
+        authService.registrarUsuario(dto); // Você precisará criar este método no AuthService
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    
     // Só o DONO logado pode cadastrar novos barbeiros
     @PostMapping("/barbeiros")
     @PreAuthorize("hasRole('DONO')")

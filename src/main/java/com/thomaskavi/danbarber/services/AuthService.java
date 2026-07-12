@@ -66,4 +66,32 @@ public class AuthService {
 
         usuarioRepository.save(barbeiro);
     }
+
+    public void registrarUsuario(com.thomaskavi.danbarber.dtos.CriarUsuarioRequestDTO dto) {
+        if (usuarioRepository.existsByLogin(dto.login())) {
+            throw new IllegalArgumentException("Já existe um usuário com esse login");
+        }
+
+        // Converte a string vinda do DTO para o Enum correspondente (Ex: "DONO" -> Role.DONO)
+        // Se vier nulo, assume DONO como padrão do sistema
+        Role roleDefinida = Role.DONO;
+        if (dto.role() != null) {
+            try {
+                roleDefinida = Role.valueOf(dto.role().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Role inválida. Use DONO ou BARBEIRO");
+            }
+        }
+
+        Usuario novoUsuario = Usuario.builder()
+                .nome(dto.nome())
+                .login(dto.login())
+                .senhaHash(passwordEncoder.encode(dto.senha()))
+                .role(roleDefinida)
+                .percentualComissao(null) // Donos não possuem comissão fixa por padrão
+                .ativo(true)
+                .build();
+
+        usuarioRepository.save(novoUsuario);
+    }
 }
