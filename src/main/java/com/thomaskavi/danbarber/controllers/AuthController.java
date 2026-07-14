@@ -29,14 +29,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
-      // NOVO MÉTODO: Aberto ao público para registrar novos usuários/donos
-    @PostMapping("/register")
-    public ResponseEntity<Void> registrarUsuario(@Valid @RequestBody CriarUsuarioRequestDTO dto) {
-        authService.registrarUsuario(dto); // Você precisará criar este método no AuthService
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    
     // Só o DONO logado pode cadastrar novos barbeiros
     @PostMapping("/barbeiros")
     @PreAuthorize("hasRole('DONO')")
