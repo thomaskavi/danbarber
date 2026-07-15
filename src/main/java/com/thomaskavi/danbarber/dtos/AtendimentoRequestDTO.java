@@ -9,10 +9,10 @@ import jakarta.validation.constraints.NotNull;
 
 public record AtendimentoRequestDTO(
 
-        // Opcional: só é usado quando o DONO está lançando em nome de um barbeiro.
+        // Opcional: só é usado quando o DONO está lançando em nome de um funcionario.
         // Quando um BARBEIRO faz a requisição, esse campo é ignorado —
-        // o barbeiro é sempre identificado pelo token de autenticação.
-        Long barbeiroId,
+        // o funcionario é sempre identificado pelo token de autenticação.
+        Long funcionarioId,
 
         String nomeCliente,
 

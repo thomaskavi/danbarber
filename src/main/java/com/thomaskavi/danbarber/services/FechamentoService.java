@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.thomaskavi.danbarber.dtos.ComissaoBarbeiroDTO;
+import com.thomaskavi.danbarber.dtos.ComissaoFuncionarioDTO;
 import com.thomaskavi.danbarber.dtos.FechamentoMensalDTO;
 import com.thomaskavi.danbarber.entities.Usuario;
 import com.thomaskavi.danbarber.enums.Role;
@@ -27,56 +27,82 @@ public class FechamentoService {
     private final AtendimentoRepository atendimentoRepository;
     private final DespesaRepository despesaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final AutenticacaoService authService;
 
-    @SuppressWarnings("null")
-public FechamentoMensalDTO gerarFechamento(LocalDate inicio, LocalDate fim) {
+    public FechamentoMensalDTO gerarFechamento(LocalDate inicio, LocalDate fim) {
 
-        LocalDateTime inicioDateTime = inicio.atStartOfDay();
-        LocalDateTime fimDateTime = LocalDateTime.of(fim, LocalTime.MAX);
+            Long empresaId = authService.obterEmpresaIdLogado();
 
-        // 1. Faturamento total por forma de pagamento (Pix, cartão, dinheiro)
-        Map<String, BigDecimal> faturamentoPorForma =
-                atendimentoRepository.somarTotalPorFormaPagamento(inicioDateTime, fimDateTime).stream()
-                        .collect(Collectors.toMap(
-                                item -> item.getFormaPagamento().name(),
-                                item -> item.getTotal()
-                        ));
+            LocalDateTime inicioDateTime = inicio.atStartOfDay();
+            LocalDateTime fimDateTime = LocalDateTime.of(fim, LocalTime.MAX);
 
-        BigDecimal faturamentoTotal = faturamentoPorForma.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            // 1. Faturamento
+            Map<String, BigDecimal> faturamentoPorForma = atendimentoRepository
+                            .somarTotalPorFormaPagamento(
+                                            empresaId,
+                                            inicioDateTime,
+                                            fimDateTime)
+                            .stream()
+                            .collect(Collectors.toMap(
+                                            item -> item.getFormaPagamento().name(),
+                                            item -> item.getTotal()));
 
-        // 2. Comissão de cada barbeiro ativo no período
-        List<Usuario> barbeiros = usuarioRepository.findByRoleAndAtivoTrue(Role.BARBEIRO);
+            BigDecimal faturamentoTotal = faturamentoPorForma.values()
+                            .stream()
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<ComissaoBarbeiroDTO> comissoes = barbeiros.stream()
-                .map(barbeiro -> {
-                    BigDecimal totalComissao = atendimentoRepository.somarComissaoPorBarbeiroEPeriodo(
-                            barbeiro.getId(), inicioDateTime, fimDateTime);
-                    return new ComissaoBarbeiroDTO(barbeiro.getId(), barbeiro.getNome(), totalComissao);
-                })
-                .toList();
+            // 2. Funcionarios da empresa
+            List<Usuario> funcionarios = usuarioRepository
+                            .findByRoleAndAtivoTrueAndEmpresaId(Role.FUNCIONARIO, empresaId)
+                            .stream()
+                            .filter(funcionario -> !atendimentoRepository
+                                            .findByFuncionarioIdAndFuncionario_Empresa_IdAndDataHoraBetween(
+                                                            funcionario.getId(),
+                                                            empresaId,
+                                                            inicioDateTime,
+                                                            fimDateTime)
+                                            .isEmpty())
+                            .toList();
 
-        BigDecimal totalComissoes = comissoes.stream()
-                .map(ComissaoBarbeiroDTO::totalComissao)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            List<ComissaoFuncionarioDTO> comissoes = funcionarios.stream()
+                            .map(funcionario -> {
 
-        // 3. Despesas do período
-        BigDecimal totalDespesas = despesaRepository.somarDespesasPorPeriodo(inicio, fim);
+                                    BigDecimal totalComissao = atendimentoRepository.somarComissaoPorFuncionarioEPeriodo(
+                                                    funcionario.getId(),
+                                                    empresaId,
+                                                    inicioDateTime,
+                                                    fimDateTime);
 
-        // 4. Saldo líquido que sobra para o dono
-        BigDecimal saldoLiquido = faturamentoTotal
-                .subtract(totalComissoes)
-                .subtract(totalDespesas);
+                                    return new ComissaoFuncionarioDTO(
+                                                    funcionario.getId(),
+                                                    funcionario.getNome(),
+                                                    totalComissao);
+                            })
+                            .toList();
 
-        return new FechamentoMensalDTO(
-                inicio,
-                fim,
-                faturamentoTotal,
-                faturamentoPorForma,
-                comissoes,
-                totalComissoes,
-                totalDespesas,
-                saldoLiquido
-        );
+            BigDecimal totalComissoes = comissoes.stream()
+                            .map(ComissaoFuncionarioDTO::totalComissao)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // 3. Despesas
+            BigDecimal totalDespesas = despesaRepository.somarDespesasPorPeriodo(
+                            empresaId,
+                            inicio,
+                            fim);
+
+            // 4. Lucro
+            BigDecimal saldoLiquido = faturamentoTotal
+                            .subtract(totalComissoes)
+                            .subtract(totalDespesas);
+
+            return new FechamentoMensalDTO(
+                            inicio,
+                            fim,
+                            faturamentoTotal,
+                            faturamentoPorForma,
+                            comissoes,
+                            totalComissoes,
+                            totalDespesas,
+                            saldoLiquido);
     }
 }

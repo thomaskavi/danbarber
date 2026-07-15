@@ -35,8 +35,8 @@ public class AtendimentoController {
     }
 
     // Ex: GET /api/atendimentos?inicio=2026-07-01T00:00:00&fim=2026-07-31T23:59:59
-     // Só o DONO vê o consolidado de todos os barbeiros
-    @PreAuthorize("hasRole('DONO')")
+     // Só o EMPREGADOR vê o consolidado de todos os funcionarios
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @GetMapping
     public ResponseEntity<List<AtendimentoResponseDTO>> listarPorPeriodo(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
@@ -44,18 +44,18 @@ public class AtendimentoController {
         return ResponseEntity.ok(atendimentoService.listarPorPeriodo(inicio, fim));
     }
 
-    // Só o DONO consulta atendimentos de um barbeiro específico por ID
-    @PreAuthorize("hasRole('DONO')")
-    @GetMapping("/barbeiro/{barbeiroId}")
-    public ResponseEntity<List<AtendimentoResponseDTO>> listarPorBarbeiroEPeriodo(
-            @PathVariable Long barbeiroId,
+    // Só o EMPREGADOR consulta atendimentos de um funcionario específico por ID
+    @PreAuthorize("hasRole('EMPREGADOR')")
+    @GetMapping("/funcionario/{funcionarioId}")
+    public ResponseEntity<List<AtendimentoResponseDTO>> listarPorFuncionarioEPeriodo(
+            @PathVariable Long funcionarioId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fim) {
         return ResponseEntity.ok(
-                atendimentoService.listarPorBarbeiroEPeriodo(barbeiroId, inicio, fim));
+                atendimentoService.listarPorFuncionarioEPeriodo(funcionarioId, inicio, fim));
     }
 
-    // Qualquer barbeiro logado vê os PRÓPRIOS atendimentos, sem precisar saber o próprio ID
+    // Qualquer   logado vê os PRÓPRIOS atendimentos, sem precisar saber o próprio ID
     @GetMapping("/meus")
     public ResponseEntity<List<AtendimentoResponseDTO>> listarMeusAtendimentos(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,

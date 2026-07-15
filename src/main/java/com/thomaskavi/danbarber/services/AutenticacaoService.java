@@ -1,12 +1,13 @@
 package com.thomaskavi.danbarber.services;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.thomaskavi.danbarber.entities.Empresa;
 import com.thomaskavi.danbarber.entities.Usuario;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -15,10 +16,18 @@ public class AutenticacaoService {
 
     private final UsuarioRepository usuarioRepository;
 
-    // O "username" salvo no contexto de segurança é o login (veja UsuarioDetailsServiceImpl)
     public Usuario obterUsuarioLogado() {
-        String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return usuarioRepository.findByLogin(login)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário autenticado não encontrado: " + login));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        return usuarioRepository.findByLogin(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Usuário autenticado não encontrado"));
+    }
+    
+    public Long obterEmpresaIdLogado() {
+    return obterUsuarioLogado().getEmpresa().getId();
+    }
+
+    public Empresa obterEmpresaLogada() {
+        return obterUsuarioLogado().getEmpresa();
     }
 }

@@ -23,7 +23,7 @@ public class FechamentoController {
     private final FechamentoService fechamentoService;
 
     // Ex: GET /api/fechamento?inicio=2026-07-01&fim=2026-07-31
-    @PreAuthorize("hasRole('DONO')")
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @GetMapping
     public ResponseEntity<FechamentoMensalDTO> gerarFechamento(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,

@@ -4,15 +4,20 @@ import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.thomaskavi.danbarber.dtos.CriarBarbeiroRequestDTO;
+import com.thomaskavi.danbarber.dtos.CriarFuncionarioRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginRequestDTO;
 import com.thomaskavi.danbarber.dtos.LoginResponseDTO;
+import com.thomaskavi.danbarber.dtos.RegistroEmpresaRequestDTO;
+import com.thomaskavi.danbarber.entities.Empresa;
 import com.thomaskavi.danbarber.entities.Usuario;
 import com.thomaskavi.danbarber.enums.Role;
+import com.thomaskavi.danbarber.repositories.EmpresaRepository;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;
 import com.thomaskavi.danbarber.security.JwtService;
 
@@ -24,11 +29,12 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AutenticacaoService autenticacaoService;
 
     public LoginResponseDTO login(LoginRequestDTO dto) {
-        // Lança exceção automaticamente se login/senha estiverem errados
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.login(), dto.senha())
         );
@@ -42,56 +48,65 @@ public class AuthService {
                 .authorities("ROLE_" + usuario.getRole().name())
                 .build();
 
+        Long empresaId = (usuario.getEmpresa() != null) ? usuario.getEmpresa().getId() : null;
+        
         String token = jwtService.generateToken(
                 userDetails,
-                Map.of("nome", usuario.getNome(), "role", usuario.getRole().name())
+                Map.of(
+                "nome", usuario.getNome(),
+                "role", usuario.getRole().name(),
+                "empresaId", (empresaId != null) ? empresaId : 0L
+            )
         );
 
         return new LoginResponseDTO(token, usuario.getNome(), usuario.getRole().name());
     }
 
-    public void registrarBarbeiro(CriarBarbeiroRequestDTO dto) {
+    // Cadastro público: cria a empresa E o dono juntos, numa transação só
+    @org.springframework.transaction.annotation.Transactional
+    public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
         if (usuarioRepository.existsByLogin(dto.login())) {
             throw new IllegalArgumentException("Já existe um usuário com esse login");
         }
 
-        Usuario barbeiro = Usuario.builder()
+        Empresa empresa = Empresa.builder()
+                .nome(dto.nomeEmpresa())
+                .ramo(dto.ramo())
+                .ativa(true)
+                .build();
+        empresa = empresaRepository.save(empresa);
+
+        Usuario dono = Usuario.builder()
+                .nome(dto.nomeDono())
+                .login(dto.login())
+                .senhaHash(passwordEncoder.encode(dto.senha()))
+                .role(Role.EMPREGADOR) // sempre EMPREGADOR, nunca lido do body
+                .empresa(empresa)
+                .percentualComissao(null)
+                .ativo(true)
+                .build();
+
+        usuarioRepository.save(dono);
+    }
+
+    // Só DONO autenticado chama isso — funcionario herda a empresa de quem tá logado
+    public void registrarFuncionario(CriarFuncionarioRequestDTO dto) {
+        Usuario donoLogado = autenticacaoService.obterUsuarioLogado();
+
+        if (usuarioRepository.existsByLogin(dto.login())) {
+            throw new IllegalArgumentException("Já existe um usuário com esse login");
+        }
+
+        Usuario funcionario = Usuario.builder()
                 .nome(dto.nome())
                 .login(dto.login())
                 .senhaHash(passwordEncoder.encode(dto.senha()))
-                .role(Role.BARBEIRO)
+                .role(Role.FUNCIONARIO)
+                .empresa(donoLogado.getEmpresa()) // herdado, nunca vindo do request
                 .percentualComissao(dto.percentualComissao())
                 .ativo(true)
                 .build();
 
-        usuarioRepository.save(barbeiro);
-    }
-
-    public void registrarUsuario(com.thomaskavi.danbarber.dtos.CriarUsuarioRequestDTO dto) {
-        if (usuarioRepository.existsByLogin(dto.login())) {
-            throw new IllegalArgumentException("Já existe um usuário com esse login");
-        }
-
-        // Converte a string vinda do DTO para o Enum correspondente (Ex: "DONO" -> Role.DONO)
-        // Se vier nulo, assume DONO como padrão do sistema
-        Role roleDefinida = Role.DONO;
-        if (dto.role() != null) {
-            try {
-                roleDefinida = Role.valueOf(dto.role().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Role inválida. Use DONO ou BARBEIRO");
-            }
-        }
-
-        Usuario novoUsuario = Usuario.builder()
-                .nome(dto.nome())
-                .login(dto.login())
-                .senhaHash(passwordEncoder.encode(dto.senha()))
-                .role(roleDefinida)
-                .percentualComissao(null) // Donos não possuem comissão fixa por padrão
-                .ativo(true)
-                .build();
-
-        usuarioRepository.save(novoUsuario);
+        usuarioRepository.save(funcionario);
     }
 }

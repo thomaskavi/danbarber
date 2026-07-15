@@ -29,8 +29,8 @@ public class ServicoController {
 
     private final ServicoService servicoService;
 
-    // Só o DONO decide preço e catálogo de serviços
-    @PreAuthorize("hasRole('DONO')")
+    // Só o EMPREGADOR decide preço e catálogo de serviços
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @PostMapping
     public ResponseEntity<ServicoResponseDTO> criar(@Valid @RequestBody ServicoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(servicoService.registrar(dto));
@@ -43,27 +43,27 @@ public class ServicoController {
     }
 
     // Só o DONO precisa ver o que está desativado, pra decidir se reativa
-    @PreAuthorize("hasRole('DONO')")
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @GetMapping("/inativos")
     public ResponseEntity<List<ServicoResponseDTO>> listarInativos() {
         return ResponseEntity.ok(servicoService.listarInativos());
     }
 
-    @PreAuthorize("hasRole('DONO')")
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<ServicoResponseDTO> atualizar(
             @PathVariable Long id, @Valid @RequestBody ServicoRequestDTO dto) {
         return ResponseEntity.ok(servicoService.atualizar(id, dto));
     }
 
-    @PreAuthorize("hasRole('DONO')")
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
         servicoService.desativar(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('DONO')")
+    @PreAuthorize("hasRole('EMPREGADOR')")
     @PatchMapping("/{id}/reativar")
     public ResponseEntity<ServicoResponseDTO> reativar(@PathVariable Long id) {
         return ResponseEntity.ok(servicoService.reativar(id));

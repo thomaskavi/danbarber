@@ -47,9 +47,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/servicos/**").hasAnyRole("DONO", "BARBEIRO")
-                        .requestMatchers("/api/atendimentos/**").hasAnyRole("DONO", "BARBEIRO")
-                        .requestMatchers("/api/despesas/**", "/api/fechamento/**").hasRole("DONO")
+                        .requestMatchers("/api/servicos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
+                        .requestMatchers("/api/atendimentos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
+                        .requestMatchers("/api/despesas/**", "/api/fechamento/**").hasRole("EMPREGADOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

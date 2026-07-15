@@ -38,8 +38,8 @@ public class Atendimento {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "barbeiro_id", nullable = false)
-    private Usuario barbeiro;
+    @JoinColumn(name = "funcionario_id", nullable = false)
+    private Usuario funcionario;
 
     // Opcional: nome do cliente, sem precisar de cadastro completo
     private String nomeCliente;
@@ -63,7 +63,7 @@ public class Atendimento {
     private BigDecimal valorTotal;
 
     // Comissão já calculada e "congelada" no momento do atendimento,
-    // usando o percentual do barbeiro naquele momento
+    // usando o percentual do funcionario naquele momento
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorComissao;
 

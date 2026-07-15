@@ -10,7 +10,7 @@ public record FechamentoMensalDTO(
         LocalDate fim,
         BigDecimal faturamentoTotal,
         Map<String, BigDecimal> faturamentoPorFormaPagamento,
-        List<ComissaoBarbeiroDTO> comissoesPorBarbeiro,
+        List<ComissaoFuncionarioDTO> comissoesPorFuncionario,
         BigDecimal totalComissoes,
         BigDecimal totalDespesas,
         BigDecimal saldoLiquido // faturamento - comissões - despesas

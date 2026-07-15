@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
-public record CriarBarbeiroRequestDTO(
+public record CriarFuncionarioRequestDTO(
 
         @NotBlank(message = "O nome é obrigatório")
         String nome,
