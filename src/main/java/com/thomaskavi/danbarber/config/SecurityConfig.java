@@ -49,7 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/servicos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
                         .requestMatchers("/api/atendimentos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
+                        .requestMatchers("/api/vendas/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
                         .requestMatchers("/api/despesas/**", "/api/fechamento/**").hasRole("EMPREGADOR")
+                        .requestMatchers("/api/produtos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

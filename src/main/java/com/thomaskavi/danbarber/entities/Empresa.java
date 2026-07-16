@@ -1,20 +1,15 @@
 package com.thomaskavi.danbarber.entities;
 
+import com.thomaskavi.danbarber.enums.Modulo;
 import com.thomaskavi.danbarber.enums.Ramo;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "empresas")
@@ -31,9 +26,17 @@ public class Empresa {
     @Column(nullable = false)
     private String nome;
 
+    // Metadado informativo — não trava mais funcionalidade sozinho
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Ramo ramo; // enum: BARBEARIA, VENDAS, etc.
+    private Ramo ramo;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "empresa_modulos", joinColumns = @JoinColumn(name = "empresa_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modulo")
+    @Builder.Default
+    private Set<Modulo> modulosAtivos = new HashSet<>();
 
     @Column(nullable = false)
     @Builder.Default

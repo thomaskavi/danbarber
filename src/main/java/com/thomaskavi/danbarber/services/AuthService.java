@@ -1,11 +1,10 @@
 package com.thomaskavi.danbarber.services;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,8 @@ import com.thomaskavi.danbarber.dtos.LoginResponseDTO;
 import com.thomaskavi.danbarber.dtos.RegistroEmpresaRequestDTO;
 import com.thomaskavi.danbarber.entities.Empresa;
 import com.thomaskavi.danbarber.entities.Usuario;
+import com.thomaskavi.danbarber.enums.Modulo;
+import com.thomaskavi.danbarber.enums.Ramo;
 import com.thomaskavi.danbarber.enums.Role;
 import com.thomaskavi.danbarber.repositories.EmpresaRepository;
 import com.thomaskavi.danbarber.repositories.UsuarioRepository;
@@ -49,7 +50,8 @@ public class AuthService {
                 .build();
 
         Long empresaId = (usuario.getEmpresa() != null) ? usuario.getEmpresa().getId() : null;
-        
+        Set<Modulo> modulos = usuario.getEmpresa() != null ? usuario.getEmpresa().getModulosAtivos() : Set.of();
+
         String token = jwtService.generateToken(
                 userDetails,
                 Map.of(
@@ -59,35 +61,43 @@ public class AuthService {
             )
         );
 
-        return new LoginResponseDTO(token, usuario.getNome(), usuario.getRole().name());
+        return new LoginResponseDTO(token, usuario.getNome(), usuario.getRole().name(), modulos);
     }
 
-    // Cadastro público: cria a empresa E o dono juntos, numa transação só
     @org.springframework.transaction.annotation.Transactional
-    public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
-        if (usuarioRepository.existsByLogin(dto.login())) {
-            throw new IllegalArgumentException("Já existe um usuário com esse login");
-        }
-
-        Empresa empresa = Empresa.builder()
-                .nome(dto.nomeEmpresa())
-                .ramo(dto.ramo())
-                .ativa(true)
-                .build();
-        empresa = empresaRepository.save(empresa);
-
-        Usuario dono = Usuario.builder()
-                .nome(dto.nomeDono())
-                .login(dto.login())
-                .senhaHash(passwordEncoder.encode(dto.senha()))
-                .role(Role.EMPREGADOR) // sempre EMPREGADOR, nunca lido do body
-                .empresa(empresa)
-                .percentualComissao(null)
-                .ativo(true)
-                .build();
-
-        usuarioRepository.save(dono);
+public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
+    if (usuarioRepository.existsByLogin(dto.login())) {
+        throw new IllegalArgumentException("Já existe um usuário com esse login");
     }
+
+    Empresa empresa = Empresa.builder()
+            .nome(dto.nomeEmpresa())
+            .ramo(dto.ramo())
+            .modulosAtivos(modulosPadraoPorRamo(dto.ramo()))
+            .ativa(true)
+            .build();
+    empresa = empresaRepository.save(empresa);
+
+    Usuario empregador = Usuario.builder()
+            .nome(dto.nomeDono())
+            .login(dto.login())
+            .senhaHash(passwordEncoder.encode(dto.senha()))
+            .role(Role.EMPREGADOR)
+            .empresa(empresa)
+            .percentualComissao(null)
+            .ativo(true)
+            .build();
+
+    usuarioRepository.save(empregador);
+}
+
+private Set<Modulo> modulosPadraoPorRamo(Ramo ramo) {
+    return switch (ramo) {
+        case BARBEARIA -> Set.of(Modulo.ATENDIMENTOS);
+        case VENDAS -> Set.of(Modulo.ESTOQUE_VENDAS);
+        case OUTRO -> Set.of();
+    };
+}
 
     // Só DONO autenticado chama isso — funcionario herda a empresa de quem tá logado
     public void registrarFuncionario(CriarFuncionarioRequestDTO dto) {
