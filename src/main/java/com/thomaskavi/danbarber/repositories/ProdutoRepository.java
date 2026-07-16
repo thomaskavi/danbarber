@@ -3,6 +3,8 @@ package com.thomaskavi.danbarber.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +28,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Produto p WHERE p.id = :id AND p.empresa.id = :empresaId")
     Optional<Produto> buscarComLockPorIdEEmpresa(Long id, Long empresaId);
+
+  Page<Produto> findByEmpresaIdAndAtivoTrue(Long empresaId, Pageable pageable);
+  Page<Produto> findByEmpresaIdAndAtivoTrueAndNomeContainingIgnoreCase(Long empresaId, String nome, Pageable pageable);
 }

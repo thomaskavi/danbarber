@@ -1,5 +1,6 @@
 package com.thomaskavi.danbarber.services;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 
@@ -93,30 +94,36 @@ public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
 
 private Set<Modulo> modulosPadraoPorRamo(Ramo ramo) {
     return switch (ramo) {
-        case BARBEARIA -> Set.of(Modulo.ATENDIMENTOS);
+        case ATENDIMENTO -> Set.of(Modulo.ATENDIMENTOS);
         case VENDAS -> Set.of(Modulo.ESTOQUE_VENDAS);
         case OUTRO -> Set.of();
     };
 }
 
-    // Só DONO autenticado chama isso — funcionario herda a empresa de quem tá logado
     public void registrarFuncionario(CriarFuncionarioRequestDTO dto) {
-        Usuario donoLogado = autenticacaoService.obterUsuarioLogado();
+    Usuario donoLogado = autenticacaoService.obterUsuarioLogado();
 
-        if (usuarioRepository.existsByLogin(dto.login())) {
-            throw new IllegalArgumentException("Já existe um usuário com esse login");
-        }
-
-        Usuario funcionario = Usuario.builder()
-                .nome(dto.nome())
-                .login(dto.login())
-                .senhaHash(passwordEncoder.encode(dto.senha()))
-                .role(Role.FUNCIONARIO)
-                .empresa(donoLogado.getEmpresa()) // herdado, nunca vindo do request
-                .percentualComissao(dto.percentualComissao())
-                .ativo(true)
-                .build();
-
-        usuarioRepository.save(funcionario);
+    if (usuarioRepository.existsByLogin(dto.login())) {
+        throw new IllegalArgumentException("Já existe um usuário com esse login");
     }
+
+    if (Boolean.TRUE.equals(dto.temComissao())
+            && (dto.percentualComissao() == null || dto.percentualComissao().compareTo(BigDecimal.ZERO) <= 0)) {
+        throw new IllegalArgumentException("Informe um percentual de comissão válido");
+    }
+
+    BigDecimal comissaoFinal = Boolean.TRUE.equals(dto.temComissao()) ? dto.percentualComissao() : null;
+
+    Usuario funcionario = Usuario.builder()
+            .nome(dto.nome())
+            .login(dto.login())
+            .senhaHash(passwordEncoder.encode(dto.senha()))
+            .role(Role.FUNCIONARIO)
+            .empresa(donoLogado.getEmpresa())
+            .percentualComissao(comissaoFinal) // null se temComissao = false, garantindo consistência
+            .ativo(true)
+            .build();
+
+    usuarioRepository.save(funcionario);
+}
 }

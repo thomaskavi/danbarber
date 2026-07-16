@@ -1,21 +1,28 @@
 package com.thomaskavi.danbarber.services;
 
-import com.thomaskavi.danbarber.dtos.*;
-import com.thomaskavi.danbarber.entities.*;
-import com.thomaskavi.danbarber.enums.Modulo;
-import com.thomaskavi.danbarber.enums.Ramo;
-import com.thomaskavi.danbarber.repositories.ProdutoRepository;
-import com.thomaskavi.danbarber.repositories.VendaRepository;
-import com.thomaskavi.danbarber.security.ModuloGuard;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.thomaskavi.danbarber.dtos.ItemVendaRequestDTO;
+import com.thomaskavi.danbarber.dtos.ItemVendaResponseDTO;
+import com.thomaskavi.danbarber.dtos.VendaRequestDTO;
+import com.thomaskavi.danbarber.dtos.VendaResponseDTO;
+import com.thomaskavi.danbarber.entities.ItemVenda;
+import com.thomaskavi.danbarber.entities.Produto;
+import com.thomaskavi.danbarber.entities.Usuario;
+import com.thomaskavi.danbarber.entities.Venda;
+import com.thomaskavi.danbarber.enums.Modulo;
+import com.thomaskavi.danbarber.repositories.ProdutoRepository;
+import com.thomaskavi.danbarber.repositories.VendaRepository;
+import com.thomaskavi.danbarber.security.ModuloGuard;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

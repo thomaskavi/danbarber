@@ -2,9 +2,13 @@ package com.thomaskavi.danbarber.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.thomaskavi.danbarber.dtos.AjusteEstoqueRequestDTO;
+import com.thomaskavi.danbarber.dtos.AtualizarProdutoRequestDTO;
 import com.thomaskavi.danbarber.dtos.ProdutoRequestDTO;
 import com.thomaskavi.danbarber.dtos.ProdutoResponseDTO;
 import com.thomaskavi.danbarber.dtos.TipoAjusteEstoque;
@@ -15,7 +19,6 @@ import com.thomaskavi.danbarber.repositories.ProdutoRepository;
 import com.thomaskavi.danbarber.security.ModuloGuard;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -54,6 +57,22 @@ public class ProdutoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProdutoResponseDTO> findAll(String name, Pageable pageable) {
+        moduloGuard.exigirModulo(Modulo.ESTOQUE_VENDAS);
+        Long empresaId = autenticacaoService.obterEmpresaIdLogado();
+
+        Page<Produto> produtosPage = (name == null || name.isBlank())
+                ? produtoRepository.findByEmpresaIdAndAtivoTrue(empresaId, pageable)
+                : produtoRepository.findByEmpresaIdAndAtivoTrueAndNomeContainingIgnoreCase(empresaId, name, pageable);
+
+        return produtosPage.map(this::toResponseDTO);
+    }
+
+public ProdutoResponseDTO buscarPorId(Long id) {
+    moduloGuard.exigirModulo(Modulo.ESTOQUE_VENDAS);
+    return toResponseDTO(buscarOuFalhar(id)); // reaproveita o método privado que já existe
+}
     public List<ProdutoResponseDTO> listarInativos() {
         moduloGuard.exigirModulo(Modulo.ESTOQUE_VENDAS);
         Long empresaId = autenticacaoService.obterEmpresaIdLogado();
@@ -62,7 +81,7 @@ public class ProdutoService {
                 .toList();
     }
 
-    public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
+    public ProdutoResponseDTO atualizar(Long id, AtualizarProdutoRequestDTO dto) {
         moduloGuard.exigirModulo(Modulo.ESTOQUE_VENDAS);
         Produto produto = buscarOuFalhar(id);
         produto.setNome(dto.nome());

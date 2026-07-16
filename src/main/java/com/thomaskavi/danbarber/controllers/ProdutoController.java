@@ -2,6 +2,9 @@ package com.thomaskavi.danbarber.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thomaskavi.danbarber.dtos.AjusteEstoqueRequestDTO;
+import com.thomaskavi.danbarber.dtos.AtualizarProdutoRequestDTO;
 import com.thomaskavi.danbarber.dtos.ProdutoRequestDTO;
 import com.thomaskavi.danbarber.dtos.ProdutoResponseDTO;
 import com.thomaskavi.danbarber.services.ProdutoService;
@@ -34,17 +39,24 @@ public class ProdutoController {
     }
 
     @GetMapping
-    public List<ProdutoResponseDTO> listarAtivos() {
-        return produtoService.listarAtivos();
+    public ResponseEntity<Page<ProdutoResponseDTO>> findAll(
+            @RequestParam(name = "name", required = false) String name,
+            @PageableDefault(size = 20, sort = "nome") Pageable pageable) {
+        return ResponseEntity.ok(produtoService.findAll(name, pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ProdutoResponseDTO buscarPorId(@PathVariable Long id) {
+        return produtoService.buscarPorId(id);
     }
 
     @GetMapping("/inativos")
-    public List<ProdutoResponseDTO> listarInativos() {
-        return produtoService.listarInativos();
+    public ResponseEntity<List<ProdutoResponseDTO>> listarInativos() {
+        return ResponseEntity.ok(produtoService.listarInativos());
     }
 
     @PutMapping("/{id}")
-    public ProdutoResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody ProdutoRequestDTO dto) {
+    public ProdutoResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody AtualizarProdutoRequestDTO dto) {
         return produtoService.atualizar(id, dto);
     }
 

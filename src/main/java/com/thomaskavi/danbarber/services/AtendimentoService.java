@@ -130,24 +130,27 @@ public class AtendimentoService {
         );
     }
 
-    private Usuario definirFuncionarioDoAtendimento(Usuario usuarioLogado, Long funcionarioIdInformado) {
-        if (usuarioLogado.getRole() == Role.FUNCIONARIO) {
-            return usuarioLogado;
-        }
+    private Usuario definirFuncionarioDoAtendimento(
+                    Usuario usuarioLogado,
+                    Long funcionarioIdInformado) {
 
-        if (funcionarioIdInformado == null) {
-            throw new IllegalArgumentException(
-                    "Como você está logado como dono, informe o funcionarioId do atendimento");
-        }
+            // Funcionário sempre lança para si mesmo
+            if (usuarioLogado.getRole() == Role.FUNCIONARIO) {
+                    return usuarioLogado;
+            }
 
-        Usuario funcionario = usuarioRepository.findById(funcionarioIdInformado)
-                .orElseThrow(() -> new EntityNotFoundException("Funcionario não encontrado"));
+            // Dono sem funcionarioId lança para ele mesmo
+            if (funcionarioIdInformado == null) {
+                    return usuarioLogado;
+            }
 
-        // Impede o DONO de lançar atendimento em nome de funcionario de outra empresa
-        if (!funcionario.getEmpresa().getId().equals(usuarioLogado.getEmpresa().getId())) {
-            throw new EntityNotFoundException("Funcionario não encontrado");
-        }
+            Usuario funcionario = usuarioRepository.findById(funcionarioIdInformado)
+                            .orElseThrow(() -> new EntityNotFoundException("Funcionário não encontrado"));
 
-        return funcionario;
+            if (!funcionario.getEmpresa().getId().equals(usuarioLogado.getEmpresa().getId())) {
+                    throw new EntityNotFoundException("Funcionário não encontrado");
+            }
+
+            return funcionario;
     }
 }

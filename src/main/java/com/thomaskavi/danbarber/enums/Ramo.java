@@ -1,7 +1,7 @@
 package com.thomaskavi.danbarber.enums;
 
 public enum Ramo {
-    BARBEARIA,
+    ATENDIMENTO,
     VENDAS,
     OUTRO
 }
