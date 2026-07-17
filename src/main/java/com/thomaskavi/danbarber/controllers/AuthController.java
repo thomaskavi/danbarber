@@ -31,13 +31,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
-<<<<<<< HEAD
-    // Só o DONO logado pode cadastrar novos barbeiros
-    @PostMapping("/barbeiros")
-    @PreAuthorize("hasRole('DONO')")
-    public ResponseEntity<Void> registrarBarbeiro(@Valid @RequestBody CriarBarbeiroRequestDTO dto) {
-        authService.registrarBarbeiro(dto);
-=======
   @PostMapping("/register")
     public ResponseEntity<Void> registrarEmpresa(@Valid @RequestBody RegistroEmpresaRequestDTO dto) {
         authService.registrarEmpresa(dto);
@@ -48,7 +41,6 @@ public class AuthController {
     @PreAuthorize("hasRole('EMPREGADOR')")
     public ResponseEntity<Void> registrarFuncionario(@Valid @RequestBody CriarFuncionarioRequestDTO dto) {
         authService.registrarFuncionario(dto);
->>>>>>> feature/multi-tenant
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

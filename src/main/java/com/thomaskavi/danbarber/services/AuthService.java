@@ -70,8 +70,6 @@ public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
     if (usuarioRepository.existsByLogin(dto.login())) {
         throw new IllegalArgumentException("Já existe um usuário com esse login");
     }
-<<<<<<< HEAD
-=======
 
     Empresa empresa = Empresa.builder()
             .nome(dto.nomeEmpresa())
@@ -92,7 +90,6 @@ public void registrarEmpresa(RegistroEmpresaRequestDTO dto) {
             .build();
 
     usuarioRepository.save(empregador);
->>>>>>> feature/multi-tenant
 }
 
 private Set<Modulo> modulosPadraoPorRamo(Ramo ramo) {
