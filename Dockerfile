@@ -12,6 +12,7 @@ COPY --from=build /app/target/*.jar app.jar
 
 # O Render injeta a variável PORT automaticamente; o Spring Boot precisa escutar nela
 ENV PORT=8080
+ENV TZ=America/Sao_Paulo
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
