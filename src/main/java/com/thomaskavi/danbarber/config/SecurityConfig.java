@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/barbeiros").hasRole("DONO")
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/servicos/**").hasAnyRole("EMPREGADOR", "FUNCIONARIO")
