@@ -18,10 +18,10 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    // Só o DONO precisa dessa lista (é ele quem escolhe em nome de qual barbeiro lançar)
-    @PreAuthorize("hasRole('DONO')")
-    @GetMapping("/barbeiros")
-    public ResponseEntity<List<UsuarioResponseDTO>> listarBarbeiros() {
-        return ResponseEntity.ok(usuarioService.listarBarbeirosAtivos());
+    // Só o DONO precisa dessa lista (é ele quem escolhe em nome de qual funcionario lançar)
+    @PreAuthorize("hasRole('EMPREGADOR')")
+    @GetMapping("/funcionarios")
+    public ResponseEntity<List<UsuarioResponseDTO>> listarFuncionarios() {
+        return ResponseEntity.ok(usuarioService.listarFuncionariosAtivos());
     }
 }

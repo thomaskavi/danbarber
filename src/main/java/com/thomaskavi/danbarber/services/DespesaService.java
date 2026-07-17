@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.thomaskavi.danbarber.dtos.DespesaRequestDTO;
 import com.thomaskavi.danbarber.dtos.DespesaResponseDTO;
 import com.thomaskavi.danbarber.entities.Despesa;
+import com.thomaskavi.danbarber.entities.Empresa;
 import com.thomaskavi.danbarber.repositories.DespesaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,20 +19,25 @@ import lombok.RequiredArgsConstructor;
 public class DespesaService {
 
     private final DespesaRepository despesaRepository;
+    private final AutenticacaoService autenticacaoService;
 
     public DespesaResponseDTO registrar(DespesaRequestDTO dto) {
+        Empresa empresa = autenticacaoService.obterUsuarioLogado().getEmpresa();
+
         Despesa despesa = Despesa.builder()
                 .descricao(dto.descricao())
                 .valor(dto.valor())
                 .data(dto.data())
                 .categoria(dto.categoria())
+                .empresa(empresa)
                 .build();
 
         return toResponseDTO(despesaRepository.save(despesa));
     }
 
     public List<DespesaResponseDTO> listarPorPeriodo(LocalDate inicio, LocalDate fim) {
-        return despesaRepository.findByDataBetween(inicio, fim).stream()
+        Long empresaId = autenticacaoService.obterEmpresaIdLogado();
+        return despesaRepository.findByDataBetweenAndEmpresaId(inicio, fim, empresaId).stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -41,9 +47,7 @@ public class DespesaService {
     }
 
     public DespesaResponseDTO atualizar(Long id, DespesaRequestDTO dto) {
-
-        Despesa despesa = despesaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada"));
+        Despesa despesa = buscarOuFalhar(id);
 
         despesa.setDescricao(dto.descricao());
         despesa.setValor(dto.valor());
@@ -54,11 +58,13 @@ public class DespesaService {
     }
 
     public void excluir(Long id) {
+        Despesa despesa = buscarOuFalhar(id);
+        despesaRepository.delete(despesa);
+    }
 
-        if (!despesaRepository.existsById(id)) {
-            throw new EntityNotFoundException("Despesa não encontrada");
-        }
-
-        despesaRepository.deleteById(id);
+    private Despesa buscarOuFalhar(Long id) {
+        Long empresaId = autenticacaoService.obterEmpresaIdLogado();
+        return despesaRepository.findByIdAndEmpresaId(id, empresaId)
+                .orElseThrow(() -> new EntityNotFoundException("Despesa não encontrada"));
     }
 }

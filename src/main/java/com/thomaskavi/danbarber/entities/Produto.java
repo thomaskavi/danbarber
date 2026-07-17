@@ -1,13 +1,10 @@
 package com.thomaskavi.danbarber.entities;
 
-import java.math.BigDecimal;
 
-import com.thomaskavi.danbarber.enums.Role;
+import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,36 +18,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "usuarios")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Usuario {
+@Table(name = "produtos")
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
+public class Produto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "empresa_id", nullable = true)
+    @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
 
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
-    private String login;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal preco;
 
     @Column(nullable = false)
-    private String senhaHash;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-    @Column(nullable = true)
-    private BigDecimal percentualComissao;
+    @Builder.Default
+    private Integer quantidadeEstoque = 0;
 
     @Column(nullable = false)
     @Builder.Default

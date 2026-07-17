@@ -25,23 +25,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
-@Table(name = "atendimentos")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Atendimento {
+@Table(name = "vendas")
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
+public class Venda {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Usuario funcionario;
+    @JoinColumn(name = "vendedor_id", nullable = false)
+    private Usuario vendedor; // FUNCIONARIO ou EMPREGADOR que vendeu
 
-    // Opcional: nome do cliente, sem precisar de cadastro completo
     private String nomeCliente;
 
     @Column(nullable = false)
@@ -52,20 +49,10 @@ public class Atendimento {
     @Column(nullable = false)
     private FormaPagamento formaPagamento;
 
-    // Snapshot dos serviços feitos + preço no momento (preços podem mudar depois)
-    @OneToMany(mappedBy = "atendimento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<AtendimentoServico> servicos = new ArrayList<>();
+    private List<ItemVenda> itens = new ArrayList<>();
 
-    // Calculado a partir da soma dos serviços — guardado para evitar recálculo
-    // e para preservar o valor histórico mesmo se preços mudarem depois
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
-
-    // Comissão já calculada e "congelada" no momento do atendimento,
-    // usando o percentual do funcionario naquele momento
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal valorComissao;
-
-    private String observacao;
 }

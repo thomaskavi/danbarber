@@ -2,9 +2,9 @@ package com.thomaskavi.danbarber.dtos;
 
 import java.math.BigDecimal;
 
-public record ComissaoBarbeiroDTO(
-        Long barbeiroId,
-        String nomeBarbeiro,
+public record ComissaoFuncionarioDTO(
+        Long funcionarioId,
+        String nomeFuncionario,
         BigDecimal totalComissao
 ) {
 }

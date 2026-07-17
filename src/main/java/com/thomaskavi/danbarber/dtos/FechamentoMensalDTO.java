@@ -6,13 +6,24 @@ import java.util.List;
 import java.util.Map;
 
 public record FechamentoMensalDTO(
+
         LocalDate inicio,
         LocalDate fim,
+
+        BigDecimal faturamentoAtendimentos,
+        BigDecimal faturamentoVendas,
+
         BigDecimal faturamentoTotal,
+
         Map<String, BigDecimal> faturamentoPorFormaPagamento,
-        List<ComissaoBarbeiroDTO> comissoesPorBarbeiro,
+
+        List<ComissaoFuncionarioDTO> comissoesPorFuncionario,
+
         BigDecimal totalComissoes,
+
         BigDecimal totalDespesas,
-        BigDecimal saldoLiquido // faturamento - comissões - despesas
+
+        BigDecimal saldoLiquido
+
 ) {
 }

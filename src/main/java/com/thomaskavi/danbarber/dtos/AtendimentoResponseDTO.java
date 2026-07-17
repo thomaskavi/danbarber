@@ -9,7 +9,7 @@ import com.thomaskavi.danbarber.enums.FormaPagamento;
 
 public record AtendimentoResponseDTO(
         Long id,
-        String barbeiroNome,
+        String funcionarioNome,
         String nomeCliente,
         LocalDateTime dataHora,
         FormaPagamento formaPagamento,
