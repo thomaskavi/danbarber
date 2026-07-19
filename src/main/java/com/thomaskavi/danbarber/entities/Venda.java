@@ -55,4 +55,9 @@ public class Venda {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
+
+    // Comissão "congelada" no momento da venda, usando o percentual do vendedor naquele instante —
+    // mesmo raciocínio do Atendimento: mudanças futuras no percentual não alteram vendas passadas
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal valorComissao;
 }

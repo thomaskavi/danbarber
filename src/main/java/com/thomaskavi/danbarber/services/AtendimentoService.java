@@ -3,6 +3,7 @@ package com.thomaskavi.danbarber.services;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class AtendimentoService {
                 .nomeCliente(dto.nomeCliente())
                 .formaPagamento(dto.formaPagamento())
                 .observacao(dto.observacao())
-                .dataHora(LocalDateTime.now())
+                .dataHora(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
                 .build();
 
         List<AtendimentoServico> itens = servicos.stream()
@@ -134,12 +135,10 @@ public class AtendimentoService {
                     Usuario usuarioLogado,
                     Long funcionarioIdInformado) {
 
-            // Funcionário sempre lança para si mesmo
             if (usuarioLogado.getRole() == Role.FUNCIONARIO) {
                     return usuarioLogado;
             }
 
-            // Dono sem funcionarioId lança para ele mesmo
             if (funcionarioIdInformado == null) {
                     return usuarioLogado;
             }

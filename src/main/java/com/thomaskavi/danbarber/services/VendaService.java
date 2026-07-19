@@ -1,7 +1,9 @@
 package com.thomaskavi.danbarber.services;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,7 @@ public class VendaService {
                 .vendedor(vendedor)
                 .nomeCliente(dto.nomeCliente())
                 .formaPagamento(dto.formaPagamento())
-                .dataHora(LocalDateTime.now())
+                .dataHora(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
                 .build();
 
         List<ItemVenda> itens = new ArrayList<>();
@@ -86,8 +88,19 @@ public class VendaService {
             itens.add(item);
         }
 
+        // Comissão calculada sobre o valor total da venda, com o percentual do vendedor
+        // "congelado" no momento — mesmo raciocínio já usado em Atendimento
+        BigDecimal percentual = vendedor.getPercentualComissao() != null
+                ? vendedor.getPercentualComissao()
+                : BigDecimal.ZERO;
+
+        BigDecimal valorComissao = valorTotal
+                .multiply(percentual)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
         venda.setItens(itens);
         venda.setValorTotal(valorTotal);
+        venda.setValorComissao(valorComissao);
 
         Venda salva = vendaRepository.save(venda);
 
@@ -130,7 +143,8 @@ public class VendaService {
                 v.getDataHora(),
                 v.getFormaPagamento(),
                 itensDto,
-                v.getValorTotal()
+                v.getValorTotal(),
+                v.getValorComissao()
         );
     }
 }

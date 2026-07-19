@@ -13,5 +13,6 @@ public record VendaResponseDTO(
         LocalDateTime dataHora,
         FormaPagamento formaPagamento,
         List<ItemVendaResponseDTO> itens,
-        BigDecimal valorTotal
+        BigDecimal valorTotal,
+        BigDecimal valorComissao
 ) {}

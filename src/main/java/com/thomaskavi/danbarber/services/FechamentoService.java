@@ -43,18 +43,17 @@ public class FechamentoService {
         LocalDateTime inicioDateTime = inicio.atStartOfDay();
         LocalDateTime fimDateTime = LocalDateTime.of(fim, LocalTime.MAX);
 
+        boolean temAtendimentos = empresa.getModulosAtivos().contains(Modulo.ATENDIMENTOS);
+        boolean temVendas = empresa.getModulosAtivos().contains(Modulo.ESTOQUE_VENDAS);
+
         BigDecimal faturamentoAtendimentos = BigDecimal.ZERO;
         BigDecimal faturamentoVendas = BigDecimal.ZERO;
 
         Map<String, BigDecimal> faturamentoPorForma = Map.of();
 
-        if (empresa.getModulosAtivos().contains(Modulo.ATENDIMENTOS)) {
-
+        if (temAtendimentos) {
             faturamentoPorForma = atendimentoRepository
-                    .somarTotalPorFormaPagamento(
-                            empresaId,
-                            inicioDateTime,
-                            fimDateTime)
+                    .somarTotalPorFormaPagamento(empresaId, inicioDateTime, fimDateTime)
                     .stream()
                     .collect(Collectors.toMap(
                             item -> item.getFormaPagamento().name(),
@@ -66,39 +65,47 @@ public class FechamentoService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
-        if (empresa.getModulosAtivos().contains(Modulo.ESTOQUE_VENDAS)) {
-
-            faturamentoVendas = vendaRepository.somarValorTotalPeriodo(
-                    empresaId,
-                    inicioDateTime,
-                    fimDateTime
-            );
+        if (temVendas) {
+            faturamentoVendas = vendaRepository.somarValorTotalPeriodo(empresaId, inicioDateTime, fimDateTime);
         }
 
-        BigDecimal faturamentoTotal =
-                faturamentoAtendimentos.add(faturamentoVendas);
+        BigDecimal faturamentoTotal = faturamentoAtendimentos.add(faturamentoVendas);
 
-        List<Usuario> funcionarios = usuarioRepository
-                .findByRoleAndAtivoTrueAndEmpresaId(Role.FUNCIONARIO, empresaId)
-                .stream()
-                .filter(funcionario -> !atendimentoRepository
-                        .findByFuncionarioIdAndFuncionario_Empresa_IdAndDataHoraBetween(
-                                funcionario.getId(),
-                                empresaId,
-                                inicioDateTime,
-                                fimDateTime)
-                        .isEmpty())
+        // Considera qualquer funcionário que teve atendimento OU venda no período —
+        // antes, quem só vendia produto (sem nenhum atendimento) ficava de fora da lista inteira
+        List<Usuario> todosFuncionarios = usuarioRepository
+                .findByRoleAndAtivoTrueAndEmpresaId(Role.FUNCIONARIO, empresaId);
+
+        List<Usuario> funcionariosComMovimento = todosFuncionarios.stream()
+                .filter(funcionario -> {
+                    boolean teveAtendimento = temAtendimentos && !atendimentoRepository
+                            .findByFuncionarioIdAndFuncionario_Empresa_IdAndDataHoraBetween(
+                                    funcionario.getId(), empresaId, inicioDateTime, fimDateTime)
+                            .isEmpty();
+
+                    boolean teveVenda = temVendas && !vendaRepository
+                            .findByVendedorIdAndVendedor_Empresa_IdAndDataHoraBetween(
+                                    funcionario.getId(), empresaId, inicioDateTime, fimDateTime)
+                            .isEmpty();
+
+                    return teveAtendimento || teveVenda;
+                })
                 .toList();
 
-        List<ComissaoFuncionarioDTO> comissoes = funcionarios.stream()
+        List<ComissaoFuncionarioDTO> comissoes = funcionariosComMovimento.stream()
                 .map(funcionario -> {
 
-                    BigDecimal totalComissao =
-                            atendimentoRepository.somarComissaoPorFuncionarioEPeriodo(
-                                    funcionario.getId(),
-                                    empresaId,
-                                    inicioDateTime,
-                                    fimDateTime);
+                    BigDecimal comissaoAtendimentos = temAtendimentos
+                            ? atendimentoRepository.somarComissaoPorFuncionarioEPeriodo(
+                                    funcionario.getId(), empresaId, inicioDateTime, fimDateTime)
+                            : BigDecimal.ZERO;
+
+                    BigDecimal comissaoVendas = temVendas
+                            ? vendaRepository.somarComissaoPorVendedorEPeriodo(
+                                    funcionario.getId(), empresaId, inicioDateTime, fimDateTime)
+                            : BigDecimal.ZERO;
+
+                    BigDecimal totalComissao = comissaoAtendimentos.add(comissaoVendas);
 
                     return new ComissaoFuncionarioDTO(
                             funcionario.getId(),
@@ -111,11 +118,7 @@ public class FechamentoService {
                 .map(ComissaoFuncionarioDTO::totalComissao)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal totalDespesas = despesaRepository
-                .somarDespesasPorPeriodo(
-                        empresaId,
-                        inicio,
-                        fim);
+        BigDecimal totalDespesas = despesaRepository.somarDespesasPorPeriodo(empresaId, inicio, fim);
 
         BigDecimal saldoLiquido = faturamentoTotal
                 .subtract(totalComissoes)
