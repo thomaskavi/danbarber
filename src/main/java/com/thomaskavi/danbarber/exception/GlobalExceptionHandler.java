@@ -27,12 +27,19 @@ public class GlobalExceptionHandler {
     // Erros de validação (@Valid) — devolve campo + mensagem de cada erro
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidacao(MethodArgumentNotValidException ex) {
-        Map<String, String> erros = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(erro ->
-                erros.put(erro.getField(), erro.getDefaultMessage())
-        );
 
-        Map<String, Object> body = corpoBase(HttpStatus.BAD_REQUEST, "Erro de validação");
+        Map<String, String> erros = new LinkedHashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(erro -> erros.put(erro.getField(), erro.getDefaultMessage()));
+
+        String primeiraMensagem = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(erro -> erro.getDefaultMessage())
+                .orElse("Erro de validação");
+
+        Map<String, Object> body = corpoBase(HttpStatus.BAD_REQUEST, primeiraMensagem);
         body.put("campos", erros);
 
         return ResponseEntity.badRequest().body(body);

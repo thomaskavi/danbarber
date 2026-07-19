@@ -14,5 +14,6 @@ public record VendaResponseDTO(
         FormaPagamento formaPagamento,
         List<ItemVendaResponseDTO> itens,
         BigDecimal valorTotal,
-        BigDecimal valorComissao
+        BigDecimal valorComissao,
+        String observacao
 ) {}

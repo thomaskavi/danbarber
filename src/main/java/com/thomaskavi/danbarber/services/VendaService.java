@@ -46,6 +46,7 @@ public class VendaService {
                 .vendedor(vendedor)
                 .nomeCliente(dto.nomeCliente())
                 .formaPagamento(dto.formaPagamento())
+                .observacao(dto.observacao())
                 .dataHora(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")))
                 .build();
 
@@ -144,7 +145,8 @@ public class VendaService {
                 v.getFormaPagamento(),
                 itensDto,
                 v.getValorTotal(),
-                v.getValorComissao()
+                v.getValorComissao(),
+                v.getObservacao()
         );
     }
 }

@@ -60,4 +60,7 @@ public class Venda {
     // mesmo raciocínio do Atendimento: mudanças futuras no percentual não alteram vendas passadas
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorComissao;
+
+    @Column(nullable = true)
+    private String observacao;
 }
